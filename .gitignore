@@ -1,0 +1,21 @@
+# 依赖与构建产物
+node_modules/
+android/.gradle/
+android/app/build/
+android/build/
+android/capacitor-cordova-android-plugins/
+*.apk
+*.aab
+dist/
+
+# 官方应用的原始截图与比对产物
+# —— 这些是第三方 App 的界面截图，不随代码一起分发
+ref/
+shots/
+
+# 系统与编辑器
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.log

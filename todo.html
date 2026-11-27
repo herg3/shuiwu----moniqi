@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=393, initial-scale=1">
+<title>待办</title>
+<link rel="stylesheet" href="common.css">
+<script src="assets/fit.js"></script>
+<style>
+/* 待办页。实测：头部径向渐变（边缘 #417CED，中心 #809AEC）；
+   提示卡 y385-530 → 128.3-176.7；白容器从 y542（css 180.7）起。 */
+:root{ --st-color:#1A1A1A; }
+.phone{background:#F4F6F9;color:#1A1A1A;}
+
+.head{
+  position:absolute;left:0;top:0;width:100%;height:180.7px;
+  background:
+    linear-gradient(90deg,rgba(65,124,237,.92) 0%,rgba(65,124,237,0) 20%,
+                    rgba(65,124,237,0) 80%,rgba(65,124,237,.92) 100%),
+    linear-gradient(180deg,#809AEC 0%,#6B9FEB 55%,#5B94EE 100%);
+}
+.bigtitle{
+  position:absolute;left:11.7px;top:56px;
+  font-size:28px;line-height:36px;font-weight:700;color:#fff;letter-spacing:1px;
+}
+.sub{
+  position:absolute;left:71.7px;top:70.3px;
+  font-size:13px;line-height:19px;color:rgba(255,255,255,.9);
+}
+.tip{
+  position:absolute;left:13.3px;top:128.3px;width:366.7px;height:48.3px;
+  border-radius:10px;background:#FEFBE8;
+  display:flex;align-items:center;padding:0 9px;box-sizing:border-box;gap:5px;
+}
+.tip svg{width:15px;height:15px;flex:0 0 auto;}
+.tip p{margin:0;font-size:12.8px;line-height:20px;color:#F09937;}
+
+.panel{
+  position:absolute;left:0;top:180.7px;width:100%;height:671.3px;
+  background:#fff;border-radius:16px 16px 0 0;overflow:hidden;
+}
+.panel::before{
+  content:'';position:absolute;left:0;top:0;width:100%;height:74px;
+  background:linear-gradient(100deg,#fff 0%,#fff 46%,#E7F0FD 62%,#D9E6FA 100%);
+}
+.tabs{position:absolute;left:0;top:26px;width:100%;display:flex;}
+.tabs span{
+  flex:1;text-align:center;font-size:15px;line-height:22px;color:#8A8F99;
+}
+.tabs span.on{color:#1A1A1A;font-weight:600;position:relative;}
+.tabs span.on::after{
+  content:'';position:absolute;left:50%;margin-left:-15px;bottom:-8px;
+  width:30px;height:3px;border-radius:2px;background:#3F79D9;
+}
+.content{position:absolute;left:0;top:146px;width:100%;text-align:center;}
+.content .art{width:253.3px;height:140px;display:block;margin:0 auto;}
+.content p{margin-top:24px;font-size:17px;line-height:24px;color:#1A1A1A;}
+</style>
+</head>
+<body>
+<div class="phone">
+
+  <div class="head"></div>
+  <div class="st-time">16:35</div>
+  <div class="st-icons wide"><img src="assets/status-dark.png" alt=""></div>
+
+  <div class="bigtitle">待办</div>
+  <div class="sub">请及时办理相关业务并确认办结情况</div>
+
+  <div class="tip">
+    <svg viewBox="0 0 24 24" fill="none" stroke="#F09937" stroke-width="1.8" stroke-linecap="round">
+      <circle cx="12" cy="12" r="9.2"/><path d="M12 7.4v5.6"/><circle cx="12" cy="16.6" r="1" fill="#F09937" stroke="none"/>
+    </svg>
+    <p>温馨提示：目前待办功能仅提供部分待办事项的服务，我们将持续升级，为您提供更全面的待办提醒。</p>
+  </div>
+
+  <div class="panel">
+    <div class="tabs">
+      <span class="on">未办结</span>
+      <span>已办结</span>
+    </div>
+    <div class="content">
+      <img class="art" src="assets/todo-empty.png" alt="">
+      <p>暂无未办结事项</p>
+    </div>
+  </div>
+
+  <div class="tabbar">
+    <a class="tab" style="left:26.5px" href="index.html">
+      <img class="ic" src="assets/tab-home-off.png" alt=""><div class="lb">首页</div>
+    </a>
+    <a class="tab on" style="left:89.3px" href="todo.html">
+      <img class="ic" src="assets/tab-todo-on.png" alt=""><div class="lb">待办</div>
+    </a>
+    <a class="tab" style="left:152.1px" href="office.html">
+      <img class="ic" src="assets/tab-office.png" alt=""><div class="lb">办&amp;查</div>
+    </a>
+    <a class="tab" style="left:214.9px" href="message.html">
+      <img class="ic" src="assets/tab-msg.png" alt=""><div class="lb">消息</div>
+      <span class="badge">4</span>
+    </a>
+    <a class="tab" style="left:277.7px" href="profile.html">
+      <img class="ic" src="assets/tab-me.png" alt=""><div class="lb">我的</div>
+    </a>
+  </div>
+
+  <div class="home-ind"></div>
+</div>
+</body>
+</html>

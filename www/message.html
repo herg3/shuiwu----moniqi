@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=393, initial-scale=1">
+<title>消息</title>
+<link rel="stylesheet" href="common.css">
+<script src="assets/fit.js"></script>
+<style>
+/* 消息页。实测：蓝头 y0-405 → 135.3，白容器从 y406 起；
+   列表图标实测 bbox x28.3-69.7 / y159.3-201.0 → 41.7×41.7，项距 85。 */
+:root{ --st-color:#fff; }
+.phone{background:#F3F5F9;color:#1A1A1A;}
+
+.head{
+  position:absolute;left:0;top:0;width:100%;height:135.3px;
+  background:radial-gradient(120% 95% at 50% 15%,#7E9BEC 0%,#5D95EA 48%,#417CED 100%);
+}
+.bigtitle{
+  position:absolute;left:10px;top:51.7px;
+  font-size:25px;line-height:32px;font-weight:700;color:#fff;letter-spacing:1px;
+}
+.filter{
+  position:absolute;left:11.7px;top:96.7px;
+  width:76.7px;height:26.7px;border-radius:8px;
+  background:rgba(255,255,255,.22);
+  display:flex;align-items:center;justify-content:center;gap:4px;
+  font-size:14px;color:#fff;
+}
+.filter svg{width:13px;height:13px;}
+.clearall{
+  position:absolute;right:13px;top:98px;
+  display:flex;align-items:center;gap:5px;
+  font-size:14px;color:rgba(255,255,255,.85);
+}
+.clearall svg{width:15px;height:15px;}
+
+.panel{
+  position:absolute;left:0;top:135.3px;width:100%;height:716.7px;
+  background:#fff;border-radius:20px 20px 0 0;overflow:hidden;
+}
+.list{position:absolute;left:0;top:0;width:100%;height:100%;overflow-y:auto;}
+.list::-webkit-scrollbar{width:0;}
+.item{position:relative;height:85px;}
+.item::after{
+  content:'';position:absolute;left:23.3px;right:22.3px;bottom:0;height:1px;background:#F0F1F3;
+}
+.item:last-child::after{display:none;}
+.item .ico{position:absolute;left:28.3px;top:24px;width:41.7px;height:41.7px;display:block;}
+.item .t{
+  position:absolute;left:88.3px;top:17.7px;
+  font-size:13.6px;line-height:20px;font-weight:600;color:#1A1A1A;
+}
+.item .dt{
+  position:absolute;right:26.3px;top:21px;
+  font-size:12px;line-height:17px;color:#B6BAC1;
+}
+.item .s{
+  position:absolute;left:88.3px;top:44px;width:262px;
+  font-size:12px;line-height:17px;color:#8A8F99;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.item .dot{
+  position:absolute;right:19px;top:51.4px;width:10px;height:10px;
+  border-radius:50%;background:#F5222D;
+}
+</style>
+</head>
+<body>
+<div class="phone">
+
+  <div class="head"></div>
+  <div class="st-time">16:35</div>
+  <div class="st-icons"><img src="assets/status-w.png" alt=""></div>
+
+  <div class="bigtitle">消息</div>
+
+  <div class="filter">筛选
+    <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M3 5h18l-7 8v6l-4 2v-8z"/>
+    </svg>
+  </div>
+  <div class="clearall">
+    <svg viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.85)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/>
+    </svg>
+    清除未读
+  </div>
+
+  <div class="panel">
+    <div class="list" id="list"></div>
+  </div>
+
+  <div class="tabbar">
+    <a class="tab" style="left:26.5px" href="index.html">
+      <img class="ic" src="assets/tab-home-off.png" alt=""><div class="lb">首页</div>
+    </a>
+    <a class="tab" style="left:89.3px" href="todo.html">
+      <img class="ic" src="assets/tab-todo.png" alt=""><div class="lb">待办</div>
+    </a>
+    <a class="tab" style="left:152.1px" href="office.html">
+      <img class="ic" src="assets/tab-office.png" alt=""><div class="lb">办&amp;查</div>
+    </a>
+    <a class="tab on" style="left:214.9px" href="message.html">
+      <img class="ic" src="assets/tab-msg-on.png" alt=""><div class="lb">消息</div>
+    </a>
+    <a class="tab" style="left:277.7px" href="profile.html">
+      <img class="ic" src="assets/tab-me.png" alt=""><div class="lb">我的</div>
+    </a>
+  </div>
+
+  <div class="home-ind"></div>
+</div>
+
+<script>
+// 数据源：改这里就能整页联动（标题/日期/摘要/未读红点/图标）
+const MSG = [
+  { icon:'msg-icon1.png', title:'扣缴申报温馨提示', date:'2026-06-11', text:'来自文昌市第二建筑安装工程公司扣缴申报的温馨提示', unread:true },
+  { icon:'msg-icon1.png', title:'扣缴申报温馨提示', date:'2026-05-19', text:'来自文昌市第二建筑安装工程公司扣缴申报的温馨提示', unread:true },
+  { icon:'msg-icon1.png', title:'扣缴申报温馨提示', date:'2026-05-18', text:'来自中国地质大学（北京）扣缴申报的温馨提示', unread:true },
+  { icon:'msg-icon1.png', title:'扣缴申报温馨提示', date:'2026-03-12', text:'来自文昌市第二建筑安装工程公司扣缴申报的温馨提示', unread:false },
+  { icon:'msg-icon1.png', title:'个税记忆上线提醒', date:'2026-02-01', text:'快来查收您的2025个税记忆吧', unread:true },
+  { icon:'msg-icon2.png', title:'专项附加扣除年度确认消息提醒', date:'2019-12-01', text:'请及时确认下一年度的专项附加扣除信息', unread:false },
+];
+
+document.getElementById('list').innerHTML = MSG.map(m => `
+  <div class="item">
+    <img class="ico" src="assets/${m.icon}" alt="">
+    <div class="t">${m.title}</div>
+    <div class="dt">${m.date}</div>
+    <div class="s">${m.text}</div>
+    ${m.unread ? '<div class="dot"></div>' : ''}
+  </div>`).join('');
+</script>
+</body>
+</html>

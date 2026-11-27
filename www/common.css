@@ -1,0 +1,69 @@
+/* 公共层：跨页面共享骨架。各页面只写自己特有的部分。
+   尺寸基准：截图 1179×2556 @3x → 393×852 CSS px，实测值 /3。
+   --ink / --gray 故意不在这里定义：两页取值不同（#1A1A1A / #333），由各页面自己给。 */
+:root{
+  --blue:#3F79D9;
+  --blue-ink:#3F7AED;
+  --bg:#F4F6F9;
+  --r-card:21px;
+  --line:#E3E4E8;
+  --gap:#F4F6F9;
+  --link:#4285F4;
+  --arrow:#CCCCCC;
+  --st-color:#fff;          /* 状态栏文字色；白底页面覆盖成 #000 */
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;}
+body{
+  background:#0E1013;
+  display:flex;align-items:center;justify-content:center;
+  min-height:100%;padding:16px 0;overflow:auto;
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","HarmonyOS Sans SC",
+              "Noto Sans SC","Source Han Sans SC","Microsoft YaHei",sans-serif;
+  -webkit-font-smoothing:antialiased;
+  text-rendering:geometricPrecision;
+}
+.phone{position:relative;width:393px;height:852px;overflow:hidden;flex:0 0 auto;}
+
+/* 状态栏：时间墨迹实测 y22.3-35.7 / x50-93.3 */
+.st-time{position:absolute;left:49.5px;top:20px;font-size:17px;line-height:19px;font-weight:600;color:var(--st-color);letter-spacing:.3px;}
+.st-icons{position:absolute;left:270px;top:15px;width:103.33px;height:30px;}
+.st-icons img{width:100%;height:100%;display:block;}
+.st-icons.wide{width:110px;}
+
+/* 二级页导航栏：文字墨迹实测 y73-89.3，分隔线 y105 */
+.navbar{position:absolute;left:0;top:54px;width:100%;height:51px;}
+.navbar .back{
+  position:absolute;left:15px;top:14.3px;
+  font-size:14px;line-height:24px;color:var(--link);
+  display:flex;align-items:center;gap:3px;text-decoration:none;
+}
+.navbar .back svg{width:8px;height:15px;}
+.navbar .title{
+  position:absolute;left:0;top:14.3px;width:100%;text-align:center;pointer-events:none;
+  font-size:16px;line-height:24px;font-weight:400;color:#1A1A1A;
+}
+.navbar .act{position:absolute;right:31px;top:14.3px;font-size:14.3px;line-height:24px;color:var(--link);}
+.nav-divider{position:absolute;left:0;top:105px;width:100%;height:1px;background:var(--line);}
+
+/* 底部 tabbar：胶囊实测 x38-1141 / y≈2310-2500 */
+.tabbar{
+  position:absolute;left:13px;top:770px;width:367px;height:63px;
+  border-radius:31.5px;background:rgba(255,255,255,.76);
+  -webkit-backdrop-filter:blur(24px);backdrop-filter:blur(24px);
+  box-shadow:0 3px 14px rgba(80,110,160,.10);
+}
+.tab{position:absolute;top:0;height:63px;width:62.8px;}
+.tab .ic{position:absolute;top:9.6px;left:50%;margin-left:-12.5px;width:25px;height:24.67px;display:block;}
+.tab .lb{position:absolute;top:36.6px;left:0;width:100%;text-align:center;font-size:10px;line-height:13px;color:#4A4E54;white-space:nowrap;}
+.tab.on .lb{color:var(--blue-ink);}
+/* tabbar 右上角红点（消息未读数） */
+.tab .badge{
+  position:absolute;top:4px;left:50%;margin-left:5px;
+  height:15px;min-width:15px;padding:0 4px;border-radius:7.5px;
+  background:#F5222D;color:#fff;font-size:10px;line-height:15px;
+  text-align:center;font-weight:500;
+}
+
+/* home indicator：实测 x380-799 / y2517-2532 */
+.home-ind{position:absolute;left:126.67px;top:839px;width:140px;height:5px;border-radius:3px;background:#000;}

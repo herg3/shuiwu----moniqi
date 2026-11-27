@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=393, initial-scale=1">
+<title>收入纳税明细</title>
+<link rel="stylesheet" href="common.css">
+<script src="assets/fit.js"></script>
+<style>
+/* 尺寸来自 ref/个税/04ada8219a66e0f7c18f4588c8f03086.png (1179×2556 @3x) 的像素测量
+   —— 卡片边界：#F4F6F9 间隙行段实测 css 106-117.3 / 201.3-216 / 379.7-392 / 555.7-568 / 731.7-744
+   列表项高 163.7，标题墨迹 y236.7-251.3，正文三行 266 / 289.3 / 319.3 */
+:root{
+  --ink:#333;
+  --gray:#999DA6;
+  --st-color:#000;
+}
+.phone{background:#fff;color:var(--ink);}
+/* ---------- 汇总卡：实测 y117.3-201.3，内部分隔线 y159.5 ---------- */
+.summary{position:absolute;left:0;top:117.3px;width:100%;height:84px;background:#fff;}
+.summary .row{position:absolute;left:0;width:100%;height:41.7px;}
+.summary .row:first-child{top:0;}
+.summary .row:last-child{top:42px;}
+.summary .row .lb{
+  position:absolute;left:16.3px;top:10px;font-size:15px;line-height:24px;color:#000;font-weight:600;
+  display:flex;align-items:center;gap:4.5px;
+}
+.summary .row .lb img{width:11px;height:10.8px;display:block;}
+.summary .row .val{
+  position:absolute;right:19px;top:10px;font-size:15px;line-height:24px;color:#000;font-weight:600;letter-spacing:.4px;
+}
+.sum-divider{position:absolute;left:17.3px;top:159.5px;width:357.7px;height:1px;background:var(--line);}
+
+/* ---------- 列表 ---------- */
+.list{position:absolute;left:0;top:216px;width:100%;height:636px;overflow-y:auto;overflow-x:hidden;background:#F4F6F9;}
+.list::-webkit-scrollbar{width:0;}
+.item{position:relative;width:100%;height:163.7px;background:#fff;margin-bottom:12.3px;}
+.item:first-child{margin-top:0;}
+.item .cat{position:absolute;left:16.3px;top:16.8px;font-size:16px;line-height:24px;font-weight:400;color:var(--ink);}
+.item .month{position:absolute;right:49.7px;top:16.8px;font-size:16px;line-height:24px;color:var(--ink);letter-spacing:1.4px;}
+.item .arrow{position:absolute;right:13px;top:75px;width:9px;height:16px;color:var(--arrow);}
+.item .sub{position:absolute;left:16.9px;font-size:14.3px;line-height:20px;color:var(--gray);white-space:nowrap;}
+.item .s1{top:46px;}
+.item .s2{top:69.3px;white-space:nowrap;}
+.item .s3{top:99.3px;}
+.item .s4{top:128px;}
+.item .num{color:var(--gray);cursor:text;outline:none;border-radius:3px;padding:0 1px;letter-spacing:.7px;}
+.item .num:hover{background:#EEF3FE;}
+.item .num:focus{background:#E3EDFF;box-shadow:0 0 0 1px #9CC0FF;color:#333;}
+
+/* 编辑提示条 */
+.hint{
+  position:absolute;left:0;top:216px;width:100%;height:0;overflow:hidden;
+  background:#EEF4FF;color:#4285F4;font-size:12px;line-height:28px;text-align:center;
+  transition:height .18s;
+}
+.hint.on{height:28px;}
+.empty{position:absolute;left:0;top:0;width:100%;text-align:center;}
+.empty .art{width:150px;height:140px;display:block;margin:28px auto 0;}
+.empty p{margin-top:34px;font-size:15px;line-height:22px;color:#9AA0A8;}
+.navbar .hot{position:absolute;left:90px;right:90px;top:0;height:51px;z-index:2;}
+/* 编辑模式下的可改字段：平时看不出来，进入编辑态才描边 */
+body.editing .num,body.editing .txt{background:#EEF3FE;box-shadow:0 0 0 1px #9CC0FF;border-radius:3px;}
+.txt:focus{outline:none;}
+.item .del{position:absolute;right:8px;top:6px;width:22px;height:22px;padding:0;border:none;border-radius:50%;
+  background:#FFE9E9;color:#F5222D;font-size:15px;line-height:22px;text-align:center;cursor:pointer;z-index:3;}
+.addrow{display:block;width:calc(100% - 34px);margin:14px 17px 24px;height:44px;border-radius:8px;
+  border:1px dashed #9CC0FF;background:#F6FAFF;color:#3F79D9;font-size:15px;font-family:inherit;cursor:pointer;}
+body.editing .item{padding-bottom:2px;}
+</style>
+</head>
+<body>
+<div class="phone">
+
+  <div class="st-time">16:35</div>
+  <div class="st-icons wide"><img src="assets/status2.png" alt=""></div>
+
+  <div class="navbar">
+    <a class="back" href="index.html">
+      <svg viewBox="0 0 12 20" fill="none" stroke="#4285F4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M10 1.6 L2 10 L10 18.4"/>
+      </svg>
+      返回
+    </a>
+    <div class="title">收入纳税明细</div>
+    <div class="hot" id="hot"></div>
+    <div class="act">批量申诉</div>
+  </div>
+  <div class="nav-divider"></div>
+
+  <div class="summary">
+    <div class="row">
+      <div class="lb">收入合计 <img src="assets/info.png" alt="">：</div>
+      <div class="val"><span id="sumIncome">21450.00</span>元</div>
+    </div>
+    <div class="row">
+      <div class="lb">已申报税额合计：</div>
+      <div class="val"><span id="sumTax">24.00</span>元</div>
+    </div>
+  </div>
+  <div class="sum-divider"></div>
+  <div style="position:absolute;left:0;top:201.3px;width:100%;height:14.7px;background:var(--gap)"></div>
+
+  <div class="list" id="list"></div>
+
+  <div class="home-ind"></div>
+  <div class="hint" id="hint">直接点数字即可修改，汇总会实时重算</div>
+</div>
+
+<script>
+// 按年份分库存数据；每一年都可以在页面上直接点数字改，改完汇总立即重算。
+// 从 filter.html 带 ?year=&types= 进来，只渲染选中的年份与所得类型。
+const DB = { 2026: [], 2025: [], 2024: [], 2023: [] };
+
+const P = new URLSearchParams(location.search);
+const YEAR = +(P.get('year') || 2026);
+const PICKED = (P.get('types') || 'salary,labor,draft,royalty').split(',').filter(Boolean);
+
+// 改动落到 localStorage，刷新/切页回来都还在（按年份分键）
+DB[YEAR] = DB[YEAR] || [];   // 内置年份之外（如 ?year=2027）也要有可写的库
+// 键带版本号：v1 存的是内置示例明细，升级后不再读取，顺手清掉老安装留下的那份
+const KEY = 'taxapp:db:v2:' + YEAR;
+try { localStorage.removeItem('taxapp:db:' + YEAR); } catch (e) {}
+function loadSaved(){
+  try {
+    const raw = localStorage.getItem(KEY);
+    if (!raw) return;
+    const arr = JSON.parse(raw);
+    if (Array.isArray(arr)) DB[YEAR] = arr;
+  } catch (e) { /* 存储被禁用时静默回落到内置数据 */ }
+}
+function save(){ try { localStorage.setItem(KEY, JSON.stringify(DB[YEAR])); } catch (e) {} }
+loadSaved();
+// 首次进入就把当前库落盘（可能是空数组），保证详情页有可写回的基底
+if (!localStorage.getItem(KEY)) { try { localStorage.setItem(KEY, JSON.stringify(DB[YEAR])); } catch (e) {} }
+
+let DATA = [];
+function refreshData(){ DATA = (DB[YEAR] || []).filter(d => PICKED.includes(d.type)); }
+refreshData();
+
+// 返回按钮回到筛选页，并带回年份
+document.querySelector('.navbar .back').href = 'filter.html?year=' + YEAR;
+
+const arrowSVG = '<svg class="arrow" viewBox="0 0 10 18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2 2 L8 9 L2 16"/></svg>';
+
+function money(n){ return n.toFixed(2); }
+
+function render(){
+  refreshData();
+  const list = document.getElementById('list');
+  if (!DATA.length) {
+    list.innerHTML = `<div class="empty">
+      <svg class="art" viewBox="0 0 150 140" fill="none">
+        <ellipse cx="76" cy="78" rx="47" ry="41" fill="#E9F2FE"/>
+        <circle cx="24" cy="34" r="5" fill="#FFD98A"/>
+        <circle cx="126" cy="104" r="4.5" fill="#CFE1FB"/>
+        <circle cx="29" cy="106" r="4" fill="#DCEAFB"/>
+        <g transform="rotate(-10 75 72)">
+          <rect x="40" y="28" width="70" height="86" rx="9" fill="#5B93F0"/>
+          <rect x="47" y="42" width="56" height="64" rx="5" fill="#FFFFFF"/>
+          <path d="M88 106 l15 -14 v14 z" fill="#DCE9FD"/>
+          <rect x="60" y="18" width="30" height="15" rx="6" fill="#3F79D9"/>
+          <rect x="66" y="21" width="18" height="8" rx="4" fill="#8FB4F2"/>
+        </g>
+        <path d="M22 86 q18 -12 34 2" stroke="#9CC0F5" stroke-width="2" stroke-linecap="round"/>
+        <path d="M104 30 q14 4 16 16" stroke="#B9D4F8" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+      <p>页面空空如也</p>
+      ${editMode ? '<button class="addrow" id="addrow">＋ 新增一条</button>' : ''}
+    </div>`;
+    refresh(); return;
+  }
+  list.innerHTML = DATA.map((d,i)=>`
+    <div class="item" data-i="${i}">
+      ${editMode ? `<button class="del" data-del="${i}" aria-label="删除">×</button>` : ''}
+      <div class="cat"><span class="txt" contenteditable="${editMode}" data-i="${i}" data-f="cat">${d.cat}</span></div>
+      <div class="month"><span class="txt" contenteditable="${editMode}" data-i="${i}" data-f="month">${d.month}</span></div>
+      ${arrowSVG}
+      <div class="sub s1">所得项目小类：<span class="txt" contenteditable="${editMode}" data-i="${i}" data-f="sub">${d.sub}</span></div>
+      <div class="sub s2">扣缴义务人：<span class="txt" contenteditable="${editMode}" data-i="${i}" data-f="agent">${d.agent}</span></div>
+      <div class="sub s3">收入：<span class="num" contenteditable="${editMode}" data-i="${i}" data-f="income">${money(d.income)}</span>元</div>
+      <div class="sub s4">已申报税额：<span class="num" contenteditable="${editMode}" data-i="${i}" data-f="tax">${money(d.tax)}</span>元</div>
+    </div>`).join('') + (editMode ? '<button class="addrow" id="addrow">＋ 新增一条</button>' : '');
+  refresh();
+}
+
+function refresh(){
+  document.getElementById('sumIncome').textContent = money(DATA.reduce((s,d)=>s+d.income,0));
+  document.getElementById('sumTax').textContent    = money(DATA.reduce((s,d)=>s+d.tax,0));
+}
+
+document.addEventListener('focusin', e => {
+  if (e.target.classList.contains('num')) e.target.select?.();
+});
+document.addEventListener('input', e => {
+  const el = e.target;
+  if (!el.classList.contains('num')) return;
+  const v = parseFloat(el.textContent.replace(/[^\d.\-]/g,''));
+  if (!isNaN(v)) { DATA[+el.dataset.i][el.dataset.f] = v; save(); refresh(); }
+});
+document.addEventListener('focusout', e => {
+  const el = e.target;
+  if (el.classList.contains('txt')) {
+    const d = DATA[+el.dataset.i];
+    const v = el.textContent.trim();
+    if (!v) { el.textContent = d[el.dataset.f]; }
+    else { d[el.dataset.f] = v; save(); }
+    return;
+  }
+  if (!el.classList.contains('num')) return;
+  const d = DATA[+el.dataset.i];
+  const v = parseFloat(el.textContent.replace(/[^\d.\-]/g,''));
+  if (isNaN(v)) { el.textContent = money(d[el.dataset.f]); }
+  else { d[el.dataset.f] = v; el.textContent = money(v); }
+  save();
+  refresh();
+});
+document.addEventListener('click', e => {
+  // 非编辑模式：点整条进详情页
+  if (!editMode && !e.target.closest('[data-del]')) {
+    const item = e.target.closest('.item[data-i]');
+    if (item) { location.href = `detail.html?year=${YEAR}&i=${item.dataset.i}`; return; }
+  }
+  const del = e.target.closest('[data-del]');
+  if (del && editMode) {
+    const idx = DB[YEAR].indexOf(DATA[+del.dataset.del]);
+    if (idx > -1) { DB[YEAR].splice(idx, 1); save(); render(); }
+    return;
+  }
+  if (e.target.closest('#addrow') && editMode) {
+    DB[YEAR].push({ type: PICKED[0] || 'salary', cat:'工资薪金', month:`${YEAR}-01`,
+                    sub:'正常工资薪金', agent:'', income:0, tax:0 });
+    save(); render();
+  }
+});
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && (e.target.classList.contains('num') || e.target.classList.contains('txt'))) { e.preventDefault(); e.target.blur(); }
+});
+
+/* ---- 隐蔽编辑入口：长按标题区域 1.5 秒进入/退出编辑模式 ---- */
+let editMode = false;
+const hint = document.getElementById('hint');
+const hot = document.getElementById('hot');
+
+function setEdit(on){
+  editMode = on;
+  document.body.classList.toggle('editing', on);
+  document.querySelectorAll('.num,.txt').forEach(el => el.setAttribute('contenteditable', on ? 'true' : 'false'));
+  render();
+  hint.textContent = on ? '编辑模式：字段可改，右上角 × 删除，底部可新增' : '';
+  hint.classList.toggle('on', on);
+}
+
+let pressTimer = null;
+function startPress(){
+  pressTimer = setTimeout(() => { setEdit(!editMode); pressTimer = null; }, 1500);
+}
+function cancelPress(){ if (pressTimer) { clearTimeout(pressTimer); pressTimer = null; } }
+
+hot.addEventListener('mousedown', startPress);
+hot.addEventListener('touchstart', startPress, {passive:true});
+['mouseup','mouseleave','touchend','touchcancel'].forEach(ev => hot.addEventListener(ev, cancelPress));
+
+render();
+</script>
+</body>
+</html>

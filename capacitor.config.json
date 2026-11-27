@@ -1,0 +1,11 @@
+{
+  "appId": "com.demo.taxsim",
+  "appName": "个人所得税",
+  "webDir": "www",
+  "android": {
+    "allowMixedContent": false
+  },
+  "server": {
+    "androidScheme": "https"
+  }
+}

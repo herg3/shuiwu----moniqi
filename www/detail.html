@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=393, initial-scale=1">
+<title>收入纳税明细详情</title>
+<link rel="stylesheet" href="common.css">
+<script src="assets/fit.js"></script>
+<style>
+/* 收入纳税明细详情页。区块：纳税明细信息 / 基础情况 / 提示条 / 本期收入与扣除详情 */
+:root{ --ink:#1A1A1A; --gray:#8A8F99; --st-color:#000; }
+.phone{background:#F5F7FA;color:var(--ink);}
+
+.scroll{position:absolute;left:0;top:106px;width:393px;height:746px;overflow-y:auto;overflow-x:hidden;}
+.scroll::-webkit-scrollbar{width:0;}
+.inner{position:relative;width:393px;padding-top:11.7px;padding-bottom:40px;}
+
+/* 标题白底、与内容连续，中间只有一条 1px 细线；灰带只出现在区块之间 */
+.sect{
+  display:flex;align-items:center;gap:5px;
+  height:45.3px;padding:0 17px;box-sizing:border-box;
+  background:#fff;border-bottom:1px solid #E3E4E8;
+}
+.sect::before{content:'';width:4px;height:15px;border-radius:2px;background:#3F79D9;}
+.sect span{font-size:16px;font-weight:700;color:#1A1A1A;}
+
+.card{background:#fff;margin:0 0 12.7px;padding-top:6.6px;}
+.row{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;padding:5.9px 17px;position:relative;}
+.row + .row::before{content:'';position:absolute;left:17px;right:17px;top:0;height:1px;background:#F0F1F3;}
+.row .k{color:var(--gray);font-size:15px;line-height:22px;flex:0 0 auto;width:38%;}
+.row .v{color:var(--ink);font-size:15px;line-height:22px;text-align:right;flex:1 1 auto;}
+.row .v.txt{word-break:break-all;}
+
+.calc{display:flex;justify-content:flex-end;align-items:center;gap:2px;padding:0 17px 23.3px;color:#3F79D9;font-size:15px;}
+.calc svg{width:8px;height:14px;}
+
+.tip{background:#EAF3FE;padding:14px 17px;margin:0 0 12.7px;font-size:13px;line-height:20px;color:#3C6FB5;}
+.tip a{color:#3F79D9;text-decoration:none;}
+
+.navbar .act{color:#3F79D9;}
+.navbar .hot{position:absolute;left:90px;right:90px;top:0;height:51px;z-index:2;}
+body.editing .v,body.editing .calc-num{background:#EEF3FE;box-shadow:0 0 0 1px #9CC0FF;border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="phone">
+
+  <div class="st-time">22:59</div>
+  <div class="st-icons wide"><img src="assets/status-dark.png" alt=""></div>
+
+  <div class="navbar">
+    <a class="back" id="back" href="income.html">
+      <svg viewBox="0 0 12 20" fill="none" stroke="#4285F4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M10 1.6 L2 10 L10 18.4"/>
+      </svg>
+      返回
+    </a>
+    <div class="title">收入纳税明细详情</div>
+    <div class="hot" id="hot"></div>
+    <div class="act" id="hot">申诉</div>
+  </div>
+  <div class="nav-divider"></div>
+
+  <div class="scroll"><div class="inner" id="body"></div></div>
+
+  <div class="home-ind"></div>
+</div>
+
+<script>
+const P = new URLSearchParams(location.search);
+const YEAR = +(P.get('year') || 2026);
+const IDX  = +(P.get('i') || 0);
+
+// 数据：优先用 income.html 存在 localStorage 里的那份（用户改过的），否则用内置默认
+const DEFAULT = { type:'salary', cat:'工资薪金', month:'', sub:'', agent:'', income:0, tax:0 };
+function loadItem(){
+  try {
+    const raw = localStorage.getItem('taxapp:db:v2:' + YEAR);
+    if (raw) { const arr = JSON.parse(raw); if (arr[IDX]) return { ...DEFAULT, ...arr[IDX] }; }
+  } catch (e) {}
+  return { ...DEFAULT };
+}
+const ITEM = loadItem();
+
+// 详情页独有的字段（income 列表里没有的）单独存一份
+const DKEY = 'taxapp:detail:v2:' + YEAR + ':' + IDX;
+try { localStorage.removeItem('taxapp:detail:' + YEAR + ':' + IDX); } catch (e) {}
+const EXTRA_DEFAULT = {
+  agentId: '',
+  taxOffice: '',
+  channel: '其他',
+  declareDate: '',
+  exemptIncome: 0.00, deduction: 5000.00, specialDeduction: 0.00,
+  otherDeduction: 0.00, donation: 0.00
+};
+function loadExtra(){
+  try { const raw = localStorage.getItem(DKEY); if (raw) return { ...EXTRA_DEFAULT, ...JSON.parse(raw) }; } catch (e) {}
+  return { ...EXTRA_DEFAULT };
+}
+let EXTRA = loadExtra();
+function saveExtra(){ try { localStorage.setItem(DKEY, JSON.stringify(EXTRA)); } catch (e) {} }
+
+// 收入/税额/小类/扣缴人属于列表那条记录，改动要写回列表的库
+const BKEY = 'taxapp:db:v2:' + YEAR;
+function saveItem(){
+  try {
+    const raw = localStorage.getItem(BKEY);
+    const arr = raw ? JSON.parse(raw) : null;
+    if (!arr || !arr[IDX]) return;
+    arr[IDX] = { ...arr[IDX], ...ITEM };
+    localStorage.setItem(BKEY, JSON.stringify(arr));
+  } catch (e) {}
+}
+
+document.getElementById('back').href = 'income.html?year=' + YEAR;
+
+const money = n => Number(n).toFixed(2);
+const row = (k, v, field, kind) =>
+  `<div class="row"><div class="k">${k}</div>
+     <div class="v ${kind || ''}" contenteditable="false" data-f="${field}" data-src="${kind || 'extra'}">${v}</div></div>`;
+
+function renderItems(){
+  const it = ITEM;
+  document.getElementById('body').innerHTML = `
+    <div class="sect"><span>纳税明细信息</span></div>
+    <div class="card">
+      ${row('收入：', money(it.income) + '元', 'income', 'num')}
+      ${row('已申报税额：', money(it.tax) + '元', 'tax', 'num')}
+      <div class="calc">查看税款计算
+        <svg viewBox="0 0 10 18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 2 L8 9 L2 16"/></svg>
+      </div>
+    </div>
+
+    <div class="sect"><span>纳税明细-基础情况</span></div>
+    <div class="card">
+      ${row('所得项目小类：', it.sub, 'sub', 'txt')}
+      ${row('扣缴义务人名称：', it.agent, 'agent', 'txt')}
+      ${row('扣缴义务人纳税人识别号：', EXTRA.agentId, 'agentId')}
+      ${row('主管税务机关：', EXTRA.taxOffice, 'taxOffice')}
+      ${row('申报渠道：', EXTRA.channel, 'channel')}
+      ${row('申报日期：', EXTRA.declareDate, 'declareDate')}
+      ${row('税款所属期：', it.month, 'month', 'txt')}
+    </div>
+
+    <div class="tip">温馨提示：专项附加扣除和个人养老金已体现在税款计算过程中，在本期数据中不予显示。您可在“税款计算-累计收入与扣除详情”中查看。<a href="#">查看税款计算</a></div>
+
+    <div class="sect"><span>本期收入与扣除详情</span></div>
+    <div class="card">
+      ${row('本期收入：', money(it.income) + '元', 'income', 'num')}
+      ${row('本期免税收入：', money(EXTRA.exemptIncome) + '元', 'exemptIncome')}
+      ${row('本期减除费用：', money(EXTRA.deduction) + '元', 'deduction')}
+      ${row('本期专项扣除：', money(EXTRA.specialDeduction) + '元', 'specialDeduction')}
+      ${row('本期其他扣除：', money(EXTRA.otherDeduction) + '元', 'otherDeduction')}
+      ${row('本期准予扣除的捐赠项目：', money(EXTRA.donation) + '元', 'donation')}
+    </div>`;
+}
+
+/* 隐蔽编辑：长按「申诉」1.5s 进出编辑模式（和明细页一致） */
+let editMode = false;
+function setEdit(on){
+  editMode = on;
+  document.body.classList.toggle('editing', on);
+  document.querySelectorAll('.v').forEach(el => el.setAttribute('contenteditable', on ? 'true' : 'false'));
+}
+let t = null;
+const hot = document.getElementById('hot');
+const start = () => { t = setTimeout(() => { setEdit(!editMode); t = null; }, 1500); };
+const cancel = () => { if (t) { clearTimeout(t); t = null; } };
+hot.addEventListener('mousedown', start);
+hot.addEventListener('touchstart', start, {passive:true});
+['mouseup','mouseleave','touchend','touchcancel'].forEach(ev => hot.addEventListener(ev, cancel));
+
+document.addEventListener('focusout', e => {
+  const el = e.target;
+  if (!el.classList.contains('v')) return;
+  const f = el.dataset.f, src = el.dataset.src;
+  const raw = el.textContent.replace(/[^\d.\-]/g, '');
+  if (src === 'num') {
+    const v = parseFloat(raw);
+    ITEM[f] = isNaN(v) ? ITEM[f] : v;
+    el.textContent = money(ITEM[f]) + '元';
+    saveItem();
+  } else if (src === 'txt') {
+    const v = el.textContent.trim();
+    if (v) ITEM[f] = v; else el.textContent = ITEM[f];
+    saveItem();
+  } else {
+    // EXTRA 里既有金额也有文本，按默认值的类型分流，别一律往数字上解析
+    const def = EXTRA_DEFAULT[f];
+    if (typeof def === 'number') {
+      const v = parseFloat(raw);
+      if (isNaN(v)) { el.textContent = money(EXTRA[f]) + '元'; }
+      else { EXTRA[f] = v; el.textContent = money(v) + '元'; }
+    } else {
+      const v = el.textContent.trim();
+      EXTRA[f] = v || def;
+      if (!v) el.textContent = EXTRA[f];
+    }
+    saveExtra();
+  }
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && e.target.classList.contains('v')) { e.preventDefault(); e.target.blur(); }
+});
+
+renderItems();
+</script>
+</body>
+</html>

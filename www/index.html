@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=393, initial-scale=1">
+<title>个人所得税 · 首页还原</title>
+<link rel="stylesheet" href="common.css">
+<script src="assets/fit.js"></script>
+<style>
+/* ============================================================
+   尺寸全部来自对官方截图 1179×2556(@3x) 的像素测量，CSS px = 实测px/3。
+   注释里的 "实测" 是可以回到原图复核的坐标。
+   ============================================================ */
+:root{
+  --ink:#1A1A1A;
+  --ink2:#333;
+  --gray:#9A9A9A;
+}
+.phone{background:var(--bg);color:var(--ink);}
+
+/* ---------- 顶部蓝区：实测 y0-310 → 103.33px ---------- */
+.hero{position:absolute;left:0;top:0;width:100%;height:103.33px;background:var(--blue);z-index:3;}
+/* hero 抬高层级后，状态栏/搜索框/扫描按钮必须一起抬上来，否则被蓝底盖住 */
+.st-time,.st-icons,.search,.scan{z-index:4;}
+/* 滚动区：头部固定，内容在下方滚动（#1 顶部 → #12 新闻 → #13 底部区块） */
+.scroll{position:absolute;left:0;top:103.33px;width:393px;height:748.67px;overflow-y:auto;overflow-x:hidden;}
+.scroll::-webkit-scrollbar{width:0;}
+.inner{position:relative;width:393px;height:1261.5px;}
+.hero-glow{
+  position:absolute;left:8px;top:-2.33px;width:377px;height:28px;
+  background:linear-gradient(180deg,#D2E3F8 0%,#E6EEF9 55%,rgba(244,246,249,0) 100%);
+  filter:blur(4px);pointer-events:none;
+}
+
+/* ---------- 搜索框：实测 x40-1010 / y193-293 ---------- */
+.search{
+  position:absolute;left:13.33px;top:64.33px;
+  width:323.33px;height:33.33px;border-radius:16.67px;
+  background:rgba(255,255,255,.37);
+}
+.search .mag{position:absolute;left:13px;top:8px;width:17.5px;height:17.5px;}
+.search .ph{position:absolute;left:44.5px;top:7.5px;font-size:15.5px;line-height:18.5px;color:#fff;}
+.scan{position:absolute;left:346.5px;top:70px;width:22px;height:22px;}
+
+/* ---------- 入口卡片：实测 left13 / top147.67 / 106×116 / r21 ---------- */
+.qcard{position:absolute;top:44.34px;width:106px;height:116px;border-radius:var(--r-card);background:#fff;overflow:hidden;}
+.qcard .t{position:absolute;left:8px;top:11.2px;font-size:13px;line-height:17px;font-weight:600;color:var(--ink);white-space:nowrap;}
+.qcard .s{position:absolute;left:8px;top:49.5px;width:94px;font-size:10px;line-height:13px;color:var(--gray);white-space:nowrap;}
+.qcard .tag{
+  position:absolute;right:0;bottom:0;height:21.67px;padding:0 4.5px;
+  border-radius:10px 0 0 0;display:flex;align-items:center;
+  font-size:13px;line-height:1;font-weight:500;
+}
+.qicon{position:absolute;width:37px;height:36.33px;}
+.qicon img{width:100%;height:100%;display:block;}
+/* 卡片横向可滑：第4个卡片原本被屏幕右边缘切掉，滑动后可见完整卡片 */
+.qwrap,.qwrap2{position:absolute;left:0;width:393px;height:161px;overflow-x:auto;overflow-y:hidden;}
+.qwrap{top:515.70px;background:linear-gradient(180deg,#D0E2F8 0,rgba(244,246,249,0) 28px);}
+.qwrap2{top:1242.66px;}
+.qwrap::-webkit-scrollbar,.qwrap2::-webkit-scrollbar{height:0;}
+.qinner{position:relative;width:470px;height:161px;}
+
+.qcard-link{position:absolute;top:6.67px;width:106px;height:160px;z-index:5;border-radius:21px;}
+.qcard-link:active{background:rgba(0,0,0,.03);}
+.tag-blue{background:linear-gradient(120deg,#B4D9FC,#D8EBFF);color:#3F79D9;}
+.tag-purple{background:linear-gradient(120deg,#DDD1FA,#C9B4F5);color:#8E6AE7;}
+.tag-green{background:linear-gradient(120deg,#A9E7C3,#CFF4E0);color:#3AA271;}
+.tag-cyan{background:linear-gradient(120deg,#A9E7E7,#CFF4F4);color:#3AA2A2;}
+
+/* ---------- banner：实测 x38-1141 / y873-1153 ---------- */
+.banner{position:absolute;left:13px;top:703.21px;width:367.33px;height:93.33px;border-radius:10px;overflow:hidden;}
+.banner img{width:100%;height:100%;display:block;object-fit:cover;}
+
+/* ---------- 资讯 tab：实测文字 y1221-1267 / x13-283.7 ---------- */
+.ntabs{position:absolute;left:12.3px;top:815.81px;display:flex;align-items:flex-start;}
+.ntabs span{font-size:15px;line-height:20px;color:var(--ink2);white-space:nowrap;}
+.ntabs .on{color:var(--blue);font-weight:700;}
+
+/* ---------- 资讯卡片：实测 x38-1141 / y1310-1652（h=114） ---------- */
+.news{position:absolute;left:13px;width:367.33px;height:114px;border-radius:var(--r-card);background:#fff;overflow:hidden;}
+.news .ill{position:absolute;right:0;display:block;}
+.news .t{position:absolute;left:17px;top:17.8px;width:190px;font-size:14px;line-height:20px;font-weight:500;color:var(--ink);}
+.news .d{
+  position:absolute;left:17px;bottom:12.67px;
+  font-size:13.5px;line-height:15px;color:#A0A0A0;letter-spacing:.1px;
+  display:flex;align-items:center;gap:4px;
+}
+.news .d svg{width:11.67px;height:11.67px;flex:0 0 auto;}
+
+.more{position:absolute;left:0;top:1230.74px;width:100%;font-size:13px;line-height:20px;color:#8A8F99;display:flex;align-items:center;justify-content:center;gap:4px;}
+.more svg{width:9px;height:9px;}
+/* #13 区块：整块切图，与官方一致 */
+/* 通知条：橙底 + 喇叭 + 滚动字幕（官方此处为横向跑马灯） */
+.notice{
+  position:absolute;left:13px;top:0;width:367.67px;height:43.7px;
+  border-radius:8px;background:#FDF5E8;
+  display:flex;align-items:center;overflow:hidden;
+}
+.notice .horn{width:26px;height:26px;margin-left:8.7px;flex:0 0 auto;display:block;}
+.notice .mq{flex:1;min-width:0;overflow:hidden;white-space:nowrap;margin-left:5px;}
+.notice .mq span{
+  display:inline-block;font-size:13.5px;line-height:43.7px;color:#8A5A2B;
+  animation:mq 16s linear infinite;
+}
+@keyframes mq{0%{transform:translateX(0)}100%{transform:translateX(-100%)}}
+.annual{position:absolute;left:13px;top:46.4px;width:367.67px;height:226.33px;display:block;}
+.keysvc{position:absolute;left:13px;top:284.43px;width:367.67px;height:215px;display:block;}
+
+
+/* ---------- 启动闪屏：白底 + 蓝色盾牌 + 应用名，2 秒后淡出 ---------- */
+#splash{
+  position:fixed;left:0;top:0;width:100%;height:100%;background:#fff;
+  z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  transition:opacity .45s ease;
+}
+#splash.hide{opacity:0;pointer-events:none;}
+/* 位置全部按原图实测（1179×2556 → css）：盾牌 y221.7-311.7 宽78高90；
+   标题墨迹 y540.3，副标题 y580.3，底部灰字 y801.3 */
+#splash .sp-mid{position:absolute;left:0;top:0;width:100%;height:100%;z-index:2;}
+#splash .sp-mid img{position:absolute;left:50%;margin-left:-39px;top:221.7px;width:78px;height:90px;}
+#splash .sp-title{position:absolute;left:0;width:100%;text-align:center;top:534.9px;
+  font-size:24px;line-height:32px;color:#1E7BE8;letter-spacing:2px;}
+#splash .sp-sub{position:absolute;left:0;width:100%;text-align:center;top:576.5px;
+  font-size:14px;line-height:20px;color:#3F8EE8;letter-spacing:.4px;}
+#splash .sp-foot{position:absolute;left:0;width:100%;text-align:center;top:797px;
+  font-size:14px;line-height:20px;color:#9AA0A8;}
+/* 背景里散落的浅灰应用图标（纯装饰） */
+#splash .chip{position:absolute;background:#F4F6F9;border-radius:9px;}
+#splash .chip::after{
+  content:'';position:absolute;left:50%;top:50%;width:42%;height:42%;
+  transform:translate(-50%,-50%);background:#E9ECF2;border-radius:3px;
+}
+</style>
+</head>
+<body>
+
+<div id="splash">
+  <div class="chip" style="left:12%;top:8%;width:44px;height:44px"></div>
+  <div class="chip" style="left:44%;top:5%;width:40px;height:40px"></div>
+  <div class="chip" style="left:78%;top:9%;width:44px;height:44px"></div>
+  <div class="chip" style="left:6%;top:24%;width:40px;height:40px"></div>
+  <div class="chip" style="left:84%;top:26%;width:42px;height:42px"></div>
+  <div class="chip" style="left:13%;top:40%;width:42px;height:42px"></div>
+  <div class="chip" style="left:80%;top:42%;width:40px;height:40px"></div>
+  <div class="chip" style="left:21%;top:55%;width:38px;height:38px"></div>
+  <div class="chip" style="left:74%;top:57%;width:38px;height:38px"></div>
+
+  <div class="sp-mid">
+    <img src="assets/splash-logo.png" alt="">
+    <div class="sp-title">个人所得税</div>
+    <div class="sp-sub">Individual Income Tax</div>
+  </div>
+  <div class="sp-foot">国家税务总局主办</div>
+</div>
+
+<script>
+// 启动 2 秒后淡出闪屏（App 冷启动时的品牌页）
+(function(){
+  var sp = document.getElementById('splash');
+  if (!sp) return;
+  setTimeout(function(){
+    sp.classList.add('hide');
+    setTimeout(function(){ sp.remove(); }, 500);
+  }, 2000);
+})();
+</script>
+
+<div class="phone">
+
+  <div class="hero"></div>
+  <div class="st-time">16:34</div>
+  <div class="st-icons"><img src="assets/status-w.png" alt=""></div>
+
+  <div class="search">
+    <svg class="mag" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round">
+      <circle cx="10.2" cy="10.2" r="6.6"/><path d="M15.2 15.2 L20.6 20.6"/>
+    </svg>
+    <div class="ph">请输入想搜索的功能/服务</div>
+  </div>
+  <svg class="scan" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round">
+    <path d="M3.2 8V5.6a2 2 0 0 1 2-2H8"/>
+    <path d="M16 3.6h2.8a2 2 0 0 1 2 2V8"/>
+    <path d="M20.8 16v2.4a2 2 0 0 1-2 2H16"/>
+    <path d="M8 20.4H5.2a2 2 0 0 1-2-2V16"/>
+    <path d="M3.4 12h17.2"/>
+  </svg>
+
+  <div class="scroll" id="scroll"><div class="inner">
+  <!-- 入口卡片：图标绝对定位在卡片之外（实测 bbox@3x 65,344） -->
+  <div class="qwrap"><div class="qinner">
+  <div class="qcard" style="left:13px">
+    <div class="t">综合所得年度<br>汇算</div>
+    <div class="s">申报与查询综合所<br>得年度汇算</div>
+    <div class="tag tag-blue">去申报</div>
+  </div>
+  <div class="qicon" style="left:21.67px;top:11.34px"><img src="assets/icon1.png" alt=""></div>
+
+  <a class="qcard-link" href="filter.html" style="left:125.7px" aria-label="收入纳税明细"></a>
+  <div class="qcard" style="left:125.7px">
+    <div class="t">收入纳税明细</div>
+    <div class="s">查看个人所得税纳<br>税明细</div>
+    <div class="tag tag-purple">去查询</div>
+  </div>
+  <div class="qicon" style="left:134.33px;top:11.34px"><img src="assets/icon2.png" alt=""></div>
+
+  <div class="qcard" style="left:238.3px">
+    <div class="t">纳税记录开具</div>
+    <div class="s">生成或查看纳税记<br>录</div>
+    <div class="tag tag-green">去开具</div>
+  </div>
+  <div class="qicon" style="left:248px;top:10.67px;height:37px"><img src="assets/icon3.png" alt=""></div>
+
+  <div class="qcard" style="left:351px">
+    <div class="t">更多功能</div>
+    <div class="s">设置在首页的常用功能</div>
+    <div class="tag tag-cyan">去设置</div>
+  </div>
+  <div class="qicon" style="left:360.67px;top:11.34px;width:35px"><img src="assets/icon4.png" alt=""></div>
+  </div></div>
+
+  <div class="banner"><img src="assets/banner.png" alt=""></div>
+
+  <div class="ntabs">
+    <span class="on" style="margin-right:10.75px">警示案例</span>
+    <span style="margin-right:10.75px">通知公告</span>
+    <span style="margin-right:10.75px">热点问题</span>
+    <span>政策解读</span>
+  </div>
+
+  <!-- 资讯卡 1 -->
+  <div class="news" style="top:848.88px">
+    <img class="ill" src="assets/news1.png" alt="" style="width:177px;height:122px;top:-4px">
+    <div class="t">办理汇算想便捷 APP密码要记<br>牢</div>
+    <div class="d">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#B0B0B0" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5.4l3.4 2"/></svg>
+      2025-02-28
+    </div>
+  </div>
+
+  <!-- 资讯卡 2 -->
+  <div class="news" style="top:978.88px">
+    <img class="ill" src="assets/news2.png" alt="" style="width:177px;height:124.67px;top:-4px">
+    <div class="t">获取退税想及时 准确卡号必须<br>有</div>
+    <div class="d">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#B0B0B0" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5.4l3.4 2"/></svg>
+      2025-02-28
+    </div>
+  </div>
+
+  <!-- 资讯卡 3：左图右文，插图矩形贴卡片左边 -->
+  <div class="news" style="top:1112.21px">
+    <img class="ill" src="assets/news3.png" alt="" style="width:150.67px;height:77.33px;top:-4px;left:0;right:auto">
+    <div class="t" style="left:163px;top:18.9px">未依法办理个人所得税综合所<br>得汇算清缴案件</div>
+    <div class="d" style="left:163px">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#B0B0B0" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5.4l3.4 2"/></svg>
+      2024-03-15
+    </div>
+  </div>
+
+      <div class="more">查看更多
+        <svg viewBox="0 0 10 10" fill="none" stroke="#8A8F99" stroke-width="1.6" stroke-linecap="round"><path d="M2 4 L5 7 L8 4"/></svg>
+      </div>
+
+      <div class="notice">
+        <img class="horn" src="assets/horn.png" alt="">
+        <div class="mq"><span>关于《个人所得税综合所得汇算清缴管理办法》的通知，请及时查阅　关于《个人所得税综合所得汇算清缴管理办法》的通知，请及时查阅</span></div>
+      </div>
+      <img class="annual" src="assets/annual13.png" alt="">
+      <img class="keysvc" src="assets/key13.png" alt="">
+
+      <!-- 常用功能：同入口卡片，也可横滑 -->
+      <div class="qwrap2"><div class="qinner">
+        <div class="qcard" style="left:13px">
+          <div class="t">综合所得年度<br>汇算</div>
+          <div class="s">申报与查询综合所<br>得年度汇算</div>
+          <div class="tag tag-blue">去申报</div>
+        </div>
+        <div class="qicon" style="left:21.67px;top:11.34px"><img src="assets/icon1.png" alt=""></div>
+
+        <a class="qcard-link" href="filter.html" style="left:125.7px" aria-label="收入纳税明细"></a>
+        <div class="qcard" style="left:125.7px">
+          <div class="t">收入纳税明细</div>
+          <div class="s">查看个人所得税纳<br>税明细</div>
+          <div class="tag tag-purple">去查询</div>
+        </div>
+        <div class="qicon" style="left:134.33px;top:11.34px"><img src="assets/icon2.png" alt=""></div>
+
+        <div class="qcard" style="left:238.3px">
+          <div class="t">纳税记录开具</div>
+          <div class="s">生成或查看纳税记<br>录</div>
+          <div class="tag tag-green">去开具</div>
+        </div>
+        <div class="qicon" style="left:248px;top:10.67px;height:37px"><img src="assets/icon3.png" alt=""></div>
+
+        <div class="qcard" style="left:351px">
+          <div class="t">更多功能</div>
+          <div class="s">设置在首页的常用功能</div>
+          <div class="tag tag-cyan">去设置</div>
+        </div>
+        <div class="qicon" style="left:360.67px;top:11.34px;width:35px"><img src="assets/icon4.png" alt=""></div>
+      </div></div>
+
+  </div></div>
+
+  <!-- 底部 tabbar -->
+  <div class="tabbar">
+    <div class="tab on" style="left:26.5px">
+      <img class="ic" src="assets/tab-home.png" alt=""><div class="lb">首页</div>
+    </div>
+    <div class="tab" style="left:89.3px">
+      <img class="ic" src="assets/tab-todo.png" alt=""><div class="lb">待办</div>
+    </div>
+    <div class="tab" style="left:152.1px">
+      <img class="ic" src="assets/tab-office.png" alt=""><div class="lb">办&amp;查</div>
+    </div>
+    <div class="tab" style="left:214.9px">
+      <img class="ic" src="assets/tab-msg.png" alt=""><div class="lb">消息</div>
+    </div>
+    <div class="tab" style="left:277.7px">
+      <img class="ic" src="assets/tab-me.png" alt=""><div class="lb">我的</div>
+    </div>
+  </div>
+
+  <div class="home-ind"></div>
+</div>
+</body>
+</html>

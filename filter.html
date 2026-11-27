@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=393, initial-scale=1">
+<title>收入纳税明细</title>
+<link rel="stylesheet" href="common.css">
+<script src="assets/fit.js"></script>
+<style>
+/* 收入纳税明细 · 查询条件页。
+   交互：年度行 → 底部年份滚轮；其他类型 → 展开 5 项；查询 → income.html?year=&types= */
+:root{ --ink:#333; --gray:#8A8F99; --st-color:#000; }
+.phone{background:#F5F7FA;color:var(--ink);}
+
+/* 区块标题：蓝竖条 + 文字 */
+.sect{position:absolute;left:0;width:100%;background:#fff;box-sizing:border-box;
+  padding-left:17.6px;display:flex;align-items:center;gap:5px;}
+.sect::before{content:'';width:4px;height:15px;border-radius:2px;background:#3F79D9;}
+.sect span{font-size:15px;line-height:20px;font-weight:600;color:#1A1A1A;}
+
+/* 年度行 */
+.yearrow{
+  position:absolute;left:0;width:100%;height:47.3px;background:#fff;
+  display:flex;align-items:center;cursor:pointer;
+}
+.yearrow .lb{position:absolute;left:17.6px;font-size:15px;color:#1A1A1A;}
+.yearrow .val{position:absolute;left:80px;font-size:15px;color:#1A1A1A;}
+.yearrow .arw{position:absolute;right:17px;width:8px;height:14px;color:#C6CAD1;}
+
+/* 类型勾选列表 */
+.types{position:absolute;left:0;width:100%;background:#fff;}
+.typ{
+  position:relative;height:51.3px;display:flex;align-items:center;cursor:pointer;
+}
+.typ::after{content:'';position:absolute;left:17.6px;right:17.6px;bottom:0;height:1px;background:#F0F1F3;}
+.typ .box{
+  position:absolute;left:24px;width:19px;height:19px;border-radius:50%;
+  border:1.5px solid #C9CED6;box-sizing:border-box;
+}
+.typ.on .box{border-color:#3F79D9;background:#3F79D9;}
+.typ.on .box::after{
+  content:'';position:absolute;left:5px;top:2.5px;width:6px;height:10px;
+  border:solid #fff;border-width:0 1.8px 1.8px 0;transform:rotate(45deg);
+}
+.typ .n{position:absolute;left:60px;font-size:15px;color:#1A1A1A;}
+
+/* 其他类型 / 收起 */
+.toggle{
+  position:absolute;left:0;width:100%;text-align:center;
+  font-size:14px;color:#3F79D9;display:flex;align-items:center;justify-content:center;gap:4px;
+  cursor:pointer;background:#fff;border-top:1px solid #F0F1F3;
+}
+.toggle svg{width:11px;height:11px;transition:transform .18s;}
+.toggle.up svg{transform:rotate(180deg);}
+
+/* 查询按钮 */
+.query{
+  position:absolute;left:22px;width:349px;height:47.7px;border-radius:8px;
+  background:#3F79D9;color:#fff;font-size:16px;line-height:47.7px;text-align:center;
+  border:none;font-family:inherit;cursor:pointer;
+}
+.query:active{background:#3570CC;}
+
+/* ---- 年份滚轮弹层 ---- */
+.mask{
+  position:absolute;left:0;top:0;width:100%;height:100%;background:rgba(0,0,0,.35);
+  opacity:0;pointer-events:none;transition:opacity .2s;z-index:20;
+}
+.mask.on{opacity:1;pointer-events:auto;}
+.sheet{
+  position:absolute;left:0;bottom:0;width:100%;height:266px;background:#fff;
+  border-radius:16px 16px 0 0;transform:translateY(100%);transition:transform .22s;
+  z-index:21;
+}
+.sheet.on{transform:translateY(0);}
+.sheet .bar{
+  position:absolute;left:0;top:0;width:100%;height:46px;
+  display:flex;align-items:center;justify-content:space-between;padding:0 16px;
+  box-sizing:border-box;border-bottom:1px solid #F0F1F3;
+}
+.sheet .bar span{font-size:16px;color:#3F79D9;cursor:pointer;}
+.sheet .bar .ok{font-weight:600;}
+.wheel{
+  position:absolute;left:0;top:46px;width:100%;height:220px;
+  overflow-y:scroll;scroll-snap-type:y mandatory;
+  scrollbar-width:none;
+}
+.wheel::-webkit-scrollbar{display:none;}
+.wheel .pad{height:110px;}
+.wheel .yr{
+  height:73.3px;line-height:73.3px;text-align:center;font-size:17px;color:#B6BAC1;
+  scroll-snap-align:center;
+}
+.wheel .yr.sel{color:#1A1A1A;font-size:20px;font-weight:500;}
+</style>
+</head>
+<body>
+<div class="phone">
+
+  <div class="st-time">08:35</div>
+  <div class="st-icons wide"><img src="assets/status2.png" alt=""></div>
+
+  <div class="navbar">
+    <a class="back" href="index.html">
+      <svg viewBox="0 0 12 20" fill="none" stroke="#4285F4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M10 1.6 L2 10 L10 18.4"/>
+      </svg>
+      返回
+    </a>
+    <div class="title">收入纳税明细</div>
+  </div>
+  <div class="nav-divider"></div>
+
+  <div class="sect" style="top:117.7px;height:45.3px"><span>请选择纳税年度</span></div>
+
+  <div class="yearrow" id="yearrow" style="top:163.7px">
+    <div class="lb">年度</div>
+    <div class="val" id="yearVal">2026</div>
+    <svg class="arw" viewBox="0 0 10 18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 2 L8 9 L2 16"/></svg>
+  </div>
+
+  <div class="sect" style="top:223.3px;height:45.7px"><span>请选择所得类型</span></div>
+
+  <div class="types" id="types" style="top:269.7px"></div>
+
+  <div class="toggle" id="toggle" style="top:474.9px;height:44px">
+    <span id="toggleText">其他类型</span>
+    <svg viewBox="0 0 12 12" fill="none" stroke="#3F79D9" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 4 L6 8 L10 4"/></svg>
+  </div>
+
+  <button class="query" id="query" style="top:563px">查询</button>
+
+  <!-- 年份滚轮 -->
+  <div class="mask" id="mask"></div>
+  <div class="sheet" id="sheet">
+    <div class="bar">
+      <span id="cancel">取消</span>
+      <span class="ok" id="ok">确定</span>
+    </div>
+    <div class="wheel" id="wheel">
+      <div class="pad"></div>
+      <div id="wheelItems"></div>
+      <div class="pad"></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const YEARS = [2023, 2024, 2025, 2026];
+const TYPES = [
+  { k:'salary',   n:'工资薪金',        on:true },
+  { k:'labor',    n:'劳务报酬',        on:true },
+  { k:'draft',    n:'稿酬',            on:true },
+  { k:'royalty',  n:'特许权使用费',    on:true },
+  { k:'business', n:'经营所得',        on:false, more:true },
+  { k:'dividend', n:'利息、股息、红利', on:false, more:true },
+  { k:'rent',     n:'财产租赁',        on:false, more:true },
+  { k:'transfer', n:'财产转让',        on:false, more:true },
+  { k:'chance',   n:'偶然所得',        on:false, more:true },
+];
+const QS = new URLSearchParams(location.search);
+let year = +(QS.get('year') || 2026);
+if (!YEARS.includes(year)) year = 2026;
+let expanded = false;
+
+const typesEl = document.getElementById('types');
+const toggleEl = document.getElementById('toggle');
+const toggleText = document.getElementById('toggleText');
+
+function renderTypes(){
+  const list = TYPES.filter(t => expanded || !t.more);
+  typesEl.innerHTML = list.map(t => `
+    <div class="typ${t.on?' on':''}" data-k="${t.k}">
+      <div class="box"></div><div class="n">${t.n}</div>
+    </div>`).join('');
+  // 勾选列表高度变化时，把下方的「其他类型」和查询按钮顶下去
+  const h = list.length * 51.3;
+  typesEl.style.height = h + 'px';
+  toggleEl.style.top = (269.7 + h) + 'px';
+  document.getElementById('query').style.top = (269.7 + h + 44 + 44.1) + 'px';
+}
+
+typesEl.addEventListener('click', e => {
+  const row = e.target.closest('.typ');
+  if (!row) return;
+  const t = TYPES.find(x => x.k === row.dataset.k);
+  t.on = !t.on;
+  row.classList.toggle('on', t.on);
+});
+
+toggleEl.addEventListener('click', () => {
+  expanded = !expanded;
+  toggleText.textContent = expanded ? '收起' : '其他类型';
+  toggleEl.classList.toggle('up', expanded);
+  renderTypes();
+});
+
+/* ---- 年份滚轮 ---- */
+const mask = document.getElementById('mask'), sheet = document.getElementById('sheet');
+const wheel = document.getElementById('wheel');
+let draftYear = year;
+const ITEM = 73.3;
+
+document.getElementById('wheelItems').innerHTML =
+  YEARS.map(y => `<div class="yr${y===year?' sel':''}" data-y="${y}">${y}</div>`).join('');
+
+function openSheet(){
+  draftYear = year;
+  mask.classList.add('on'); sheet.classList.add('on');
+  // 滚到当前年份
+  const idx = Math.max(0, YEARS.indexOf(year));
+  setTimeout(() => { wheel.scrollTop = idx * ITEM; }, 60);
+  markSel();
+}
+function closeSheet(){
+  mask.classList.remove('on'); sheet.classList.remove('on');
+}
+function markSel(){
+  document.querySelectorAll('.wheel .yr').forEach(el => {
+    el.classList.toggle('sel', +el.dataset.y === draftYear);
+  });
+}
+// 滚动时用 scroll-snap 对齐，滚动结束取中心项
+let t = null;
+wheel.addEventListener('scroll', () => {
+  const idx = Math.round(wheel.scrollTop / ITEM);
+  const y = YEARS[Math.max(0, Math.min(YEARS.length - 1, idx))];
+  if (y !== undefined && y !== draftYear) { draftYear = y; markSel(); }
+});
+
+document.getElementById('yearrow').addEventListener('click', openSheet);
+document.getElementById('cancel').addEventListener('click', closeSheet);
+mask.addEventListener('click', closeSheet);
+document.getElementById('ok').addEventListener('click', () => {
+  year = draftYear;
+  document.getElementById('yearVal').textContent = year;
+  closeSheet();
+});
+document.querySelectorAll('.wheel .yr').forEach(el => {
+  el.addEventListener('click', () => {
+    draftYear = +el.dataset.y;
+    wheel.scrollTop = YEARS.indexOf(draftYear) * ITEM;
+    markSel();
+  });
+});
+
+/* ---- 查询 ---- */
+document.getElementById('query').addEventListener('click', () => {
+  const picked = TYPES.filter(t => t.on).map(t => t.k).join(',');
+  location.href = `income.html?year=${year}&types=${picked}`;
+});
+
+document.getElementById('yearVal').textContent = year;
+renderTypes();
+</script>
+</body>
+</html>

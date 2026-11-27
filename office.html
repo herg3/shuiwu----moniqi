@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=393, initial-scale=1">
+<title>办&查</title>
+<link rel="stylesheet" href="common.css">
+<script src="assets/fit.js"></script>
+<style>
+/* 办&查页。头部用 HTML（标题/副标题为真实文本），
+   主体（办税卡片 / 图标网格 / 警示案例 / 查询）为实测整块切图 assets/office-body.png。
+   实测：蓝头 y0-298 → 99.33，白容器从 y298 起，body 起点 y300。 */
+:root{ --st-color:#fff; }
+.phone{background:#F5F7FA;color:#1A1A1A;}
+
+.head{
+  position:absolute;left:0;top:0;width:100%;height:100px;
+  background:radial-gradient(120% 95% at 50% 15%,#7C9BEC 0%,#5C92EA 48%,#417CED 100%);
+}
+.bigtitle{
+  position:absolute;left:13px;top:56.2px;
+  font-size:21.5px;line-height:28px;font-weight:700;color:#fff;letter-spacing:.2px;
+}
+.sub{
+  position:absolute;left:90px;top:63.3px;
+  font-size:11.3px;line-height:16px;color:rgba(255,255,255,.85);
+}
+
+.body{position:absolute;left:0;top:100px;width:393px;}
+.body img{width:393px;display:block;}
+</style>
+</head>
+<body>
+<div class="phone">
+
+  <div class="head"></div>
+  <div class="st-time">16:35</div>
+  <div class="st-icons"><img src="assets/status-w.png" alt=""></div>
+
+  <div class="bigtitle">办&amp;查</div>
+  <div class="sub">请选择您需要办理或查询的事项</div>
+
+  <div class="body"><img src="assets/office-body.png" alt=""></div>
+
+  <div class="tabbar">
+    <a class="tab" style="left:26.5px" href="index.html">
+      <img class="ic" src="assets/tab-home-off.png" alt=""><div class="lb">首页</div>
+    </a>
+    <a class="tab" style="left:89.3px" href="todo.html">
+      <img class="ic" src="assets/tab-todo.png" alt=""><div class="lb">待办</div>
+    </a>
+    <a class="tab on" style="left:152.1px" href="office.html">
+      <img class="ic" src="assets/tab-office-on.png" alt=""><div class="lb">办&amp;查</div>
+    </a>
+    <a class="tab" style="left:214.9px" href="message.html">
+      <img class="ic" src="assets/tab-msg.png" alt=""><div class="lb">消息</div>
+      <span class="badge">4</span>
+    </a>
+    <a class="tab" style="left:277.7px" href="profile.html">
+      <img class="ic" src="assets/tab-me.png" alt=""><div class="lb">我的</div>
+    </a>
+  </div>
+
+  <div class="home-ind"></div>
+</div>
+</body>
+</html>
